@@ -1,23 +1,31 @@
+import numpy as np
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from typing import Callable
+from numpy.typing import NDArray
 
 
 BACKGROUND_COLOR = "#1e1e2e"
 SURFACE_COLOR = "#313244"
 FOREGROUND_COLOR = "#cdd6f4"
+ACCENT_COLOR = "#f38ba8"
 
 ENTRY_WIDTH = 24
+ENTRY_PAD = 6
 BTN_WIDTH = 22
 PAD_X = (24, 24)
 
 
 class App(tk.Tk):
-    def __init__(self, thermogram):
+    def __init__(
+        self,
+        # save_thermogram: callable
+    ):
         super().__init__()
         self.title("IR THERMOGRAM")
         self.configure(bg=BACKGROUND_COLOR)
-        self.thermogram = thermogram
+        # self.save_thermogram = save_thermogram
         # self.geometry('300x50')
 
         self.header = tk.Label(
@@ -47,13 +55,14 @@ class App(tk.Tk):
             bg=BACKGROUND_COLOR,
             font=(None, 14),
             fg=FOREGROUND_COLOR,
-            width=ENTRY_WIDTH
+            width=ENTRY_WIDTH,
         )
         self.patient_id.grid(
             row=8,
             column=0,
             sticky=tk.W,
-            padx=PAD_X
+            padx=PAD_X,
+            ipady=ENTRY_PAD
         )
 
         self.patient_name_label = tk.Label(
@@ -80,7 +89,8 @@ class App(tk.Tk):
             row=10,
             column=0,
             sticky=tk.W,
-            padx=PAD_X
+            padx=PAD_X,
+            ipady=ENTRY_PAD
         )
 
         self.patient_age_label = tk.Label(
@@ -107,7 +117,8 @@ class App(tk.Tk):
             row=12,
             column=0,
             sticky=tk.W,
-            padx=PAD_X
+            padx=PAD_X,
+            ipady=ENTRY_PAD
         )
 
         self.patient_weight_label = tk.Label(
@@ -134,7 +145,8 @@ class App(tk.Tk):
             row=14,
             column=0,
             sticky=tk.W,
-            padx=PAD_X
+            padx=PAD_X,
+            ipady=ENTRY_PAD
         )
 
         self.patient_gender_label = tk.Label(
@@ -142,7 +154,7 @@ class App(tk.Tk):
             bg=BACKGROUND_COLOR,
             font=(None, 14),
             fg=FOREGROUND_COLOR,
-            text="AGE"
+            text="GENDER"
         )
         self.patient_gender_label.grid(
             row=15,
@@ -161,16 +173,21 @@ class App(tk.Tk):
             row=16,
             column=0,
             sticky=tk.W,
-            padx=PAD_X
+            padx=PAD_X,
+            ipady=ENTRY_PAD
         )
 
         self.record_btn = tk.Button(
             self,
-            bg=BACKGROUND_COLOR,
+            bg=ACCENT_COLOR,
             font=(None, 14),
-            fg=FOREGROUND_COLOR,
+            fg=BACKGROUND_COLOR,
             text="SAVE THERMOGRAM",
-            width=BTN_WIDTH
+            width=BTN_WIDTH,
+            height=2,
+            command=self.on_record,
+            highlightthickness = 0,
+            bd=0
         )
         self.record_btn.grid(
             row=19,
@@ -194,8 +211,27 @@ class App(tk.Tk):
             padx=PAD_X
         )
 
+        self.thermogram = np.zeros((720, 960, 3), np.uint8)
         self.image = ImageTk.PhotoImage(Image.fromarray(self.thermogram))
-        self.thermogram = tk.Label(self, image=self.image, borderwidth=0)
+        self.thermogram = tk.Label(
+            self,
+            image=self.image,
+            borderwidth=0,
+            background=BACKGROUND_COLOR
+        )
         self.thermogram.grid(row=0, column=1, rowspan=30)
 
-        
+    def add_record_callback(self, save_thermogram: Callable):
+        self.save_thermogram = save_thermogram
+
+    def update_thermogram(self, thermogram: NDArray[np.uint8]):
+        self.image = ImageTk.PhotoImage(Image.fromarray(thermogram))
+        self.thermogram.configure(image=self.image)
+
+    def on_record(self):
+        id = self.patient_id.get()
+        name = self.patient_name.get()
+        age = self.patient_age.get()
+        weigth = self.patient_weight.get()
+        gender = self.patient_gender.get()
+        self.save_thermogram(id, name, age, weigth, gender)

@@ -1,13 +1,16 @@
 # import tkinter as tk
-from utils import SerialPort, Thermogram, get_serial_data
+from utils import SerialPort, UiState
 # from PIL import Image, ImageTk
 
 
-# # port = SerialPort(115200).open()
+port = SerialPort(115200).open()
 
 # # data = get_serial_data(port)
-data = [32.0] * 50
-thermogram = Thermogram.generate_thermogram(data)
+# data = [32.0] * 50
+# thermogram1 = Thermogram.generate_thermogram(data)
+
+# data = [37.0] * 50
+# thermogram2 = Thermogram.generate_thermogram(data)
 
 # BACKGROUND_COLOR = "#1e1e2e"
 # SURFACE_COLOR = "#313244"
@@ -41,5 +44,9 @@ thermogram = Thermogram.generate_thermogram(data)
 from ui import App
 
 
-app = App(thermogram)
+
+app = App()
+ui_state = UiState(port, app.update_thermogram)
+app.add_record_callback(ui_state.record_data)
+ui_state.start()
 app.mainloop()
