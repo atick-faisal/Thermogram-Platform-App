@@ -7,7 +7,8 @@ from typing import Callable
 from threading import Thread
 from numpy.typing import NDArray
 
-from .thermogram import Thermogram, get_serial_data
+from .thermogram import Thermogram
+from .serialutils import get_serial_data
 
 
 class UiState(Thread):
