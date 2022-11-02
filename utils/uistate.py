@@ -1,15 +1,13 @@
 import os
-import cv2
 import time
 import numpy as np
-import tkinter as tk
 from PIL import Image
 from serial import Serial
 from typing import Callable
 from threading import Thread
 from numpy.typing import NDArray
 
-from utils import Thermogram, get_serial_data
+from .thermogram import Thermogram, get_serial_data
 
 
 class UiState(Thread):
@@ -44,7 +42,8 @@ class UiState(Thread):
         temperature_path = os.path.join(path, f"Temperature.csv")
 
         with open(demographics_path, "w") as f:
-            f.write(f"ID {id}\nNAME {name}\nAGE {age}\nWEIGHT {weigth}\nGENDER {gender}")
+            f.write(
+                f"ID {id}\nNAME {name}\nAGE {age}\nWEIGHT {weigth}\nGENDER {gender}")
 
         with open(temperature_path, "w") as f:
             f.write(",\n".join(map(str, self.data)))
