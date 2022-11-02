@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 from typing import List
 from numpy.typing import NDArray
+from matplotlib.pyplot import cm
 
 
 WIDTH = 32
-HEIGHT = 24
+HEIGHT = 25
 MIN_TEMP = 27.0
 MAX_TEMP = 37.0
 TEMP_RANGE = MAX_TEMP - MIN_TEMP
@@ -79,11 +80,11 @@ class Thermogram(object):
         )
 
     @staticmethod
-    def gaussian_blur(image: NDArray, ksize: int = 9) -> NDArray[np.uint8]:
+    def gaussian_blur(image: NDArray, ksize: int = 7) -> NDArray[np.uint8]:
         return cv2.GaussianBlur(image, (ksize, ksize), 0) * 3
 
     @staticmethod
-    def average_blur(image: NDArray, ksize: int = 11) -> NDArray[np.uint8]:
+    def average_blur(image: NDArray, ksize: int = 31) -> NDArray[np.uint8]:
         return cv2.blur(image, ksize=(ksize, ksize))
 
     @staticmethod
@@ -93,11 +94,18 @@ class Thermogram(object):
         temperature = np.array(temperature, dtype=np.float32)
         temperature[temperature < MIN_TEMP] = MIN_TEMP
         temperature[temperature > MAX_TEMP] = MAX_TEMP
-        temperature = ((temperature - MIN_TEMP) / TEMP_RANGE) * 10.0
-        temperature = temperature.astype(np.int8)
+
+        # temperature = ((temperature - MIN_TEMP) / TEMP_RANGE) * 10.0
+        # temperature = temperature.astype(np.int8)
+
+        temperature = ((temperature - MIN_TEMP) / TEMP_RANGE)
 
         thermogram = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
-        thermogram[SENSOR_Y, SENSOR_X, :] = CMAP[temperature]
+        # thermogram[SENSOR_Y, SENSOR_X, :] = CMAP[temperature]
+
+        for i in range(temperature.size):
+            thermogram[SENSOR_Y[i], SENSOR_X[i], :] = \
+                np.array(cm.jet(temperature[i]))[:-1] * 255
 
         thermogram = Thermogram.gaussian_blur(thermogram)
         thermogram = Thermogram.interpolate(thermogram)
