@@ -105,7 +105,7 @@ class Thermogram(object):
 
         for i in range(temperature.size):
             thermogram[SENSOR_Y[i], SENSOR_X[i], :] = \
-                np.array(cm.jet(temperature[i]))[:-1] * 255
+                np.array(cm.hot(temperature[i]))[:-1] * 255
 
         thermogram = Thermogram.gaussian_blur(thermogram)
         thermogram = Thermogram.interpolate(thermogram)
