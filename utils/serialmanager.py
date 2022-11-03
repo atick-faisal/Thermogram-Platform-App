@@ -20,7 +20,7 @@ class SerialPort:
         ports = [
             p.device
             for p in comports()
-            if "CP2102" in p.description
+            if "CP210" in p.description
         ]
         if not ports:
             raise IOError("no device found!")
