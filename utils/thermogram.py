@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pandas as pd
 from typing import List
 from numpy.typing import NDArray
 from matplotlib.pyplot import cm
@@ -95,8 +96,9 @@ class Thermogram(object):
         temperature = np.array(temperature, dtype=np.float32)
 
         if AUTO_ADJUST:
-            MIN_TEMP = np.min(temperature)
-            MAX_TEMP = np.max(temperature)
+            MIN_TEMP = np.median(temperature) - 2.5
+            MAX_TEMP = np.median(temperature) + 2.5
+            TEMP_RANGE = MAX_TEMP - MIN_TEMP
 
         temperature[temperature < MIN_TEMP] = MIN_TEMP
         temperature[temperature > MAX_TEMP] = MAX_TEMP
@@ -107,15 +109,24 @@ class Thermogram(object):
         temperature = ((temperature - MIN_TEMP) / TEMP_RANGE)
 
         thermogram = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
+        mask = np.zeros((HEIGHT, WIDTH), dtype=np.int8)
+        template = pd.read_csv("utils/template.csv",
+                               header=None).to_numpy(dtype=np.int8)
+        # mask[2:-1, 5:14] = template
+
         # thermogram[SENSOR_Y, SENSOR_X, :] = CMAP[temperature]
 
         for i in range(temperature.size):
             thermogram[SENSOR_Y[i], SENSOR_X[i], :] = \
                 np.array(cm.jet(temperature[i]))[:-1] * 255
 
+            # thermogram[template==-(i + 1), :] = \
+            #     np.array(cm.jet(temperature[i]))[:-1] * 255
+
         thermogram = Thermogram.gaussian_blur(thermogram)
         thermogram = Thermogram.interpolate(thermogram)
         thermogram = Thermogram.average_blur(thermogram)
+        # thermogram = Thermogram.gaussian_blur(thermogram)
         thermogram = Thermogram.apply_brightness_contrast(thermogram)
 
         return thermogram
