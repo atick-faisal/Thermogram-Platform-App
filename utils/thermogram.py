@@ -7,9 +7,10 @@ from matplotlib.pyplot import cm
 
 WIDTH = 32
 HEIGHT = 25
-MIN_TEMP = 27.0
-MAX_TEMP = 37.0
+MIN_TEMP = 20.0
+MAX_TEMP = 30.0
 TEMP_RANGE = MAX_TEMP - MIN_TEMP
+AUTO_ADJUST = True
 
 # CMAP = np.array([
 #     [0, 51, 251],
@@ -92,6 +93,11 @@ class Thermogram(object):
         temperature: NDArray[np.float32] | List[float]
     ) -> NDArray[np.uint8]:
         temperature = np.array(temperature, dtype=np.float32)
+
+        if AUTO_ADJUST:
+            MIN_TEMP = np.min(temperature)
+            MAX_TEMP = np.max(temperature)
+
         temperature[temperature < MIN_TEMP] = MIN_TEMP
         temperature[temperature > MAX_TEMP] = MAX_TEMP
 
@@ -105,7 +111,7 @@ class Thermogram(object):
 
         for i in range(temperature.size):
             thermogram[SENSOR_Y[i], SENSOR_X[i], :] = \
-                np.array(cm.hot(temperature[i]))[:-1] * 255
+                np.array(cm.jet(temperature[i]))[:-1] * 255
 
         thermogram = Thermogram.gaussian_blur(thermogram)
         thermogram = Thermogram.interpolate(thermogram)
