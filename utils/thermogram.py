@@ -1,43 +1,47 @@
 import cv2
 import numpy as np
-import pandas as pd
 from typing import List
 from numpy.typing import NDArray
 from matplotlib.pyplot import cm
+from sklearn.neighbors import KNeighborsRegressor
 
 
-WIDTH = 32
-HEIGHT = 25
+WIDTH = 960
+HEIGHT = 720
 MIN_TEMP = 20.0
 MAX_TEMP = 30.0
 TEMP_RANGE = MAX_TEMP - MIN_TEMP
 AUTO_ADJUST = True
 
-# CMAP = np.array([
-#     [0, 51, 251],
-#     [5, 164, 246],
-#     [2, 244, 255],
-#     [1, 245, 251],
-#     [0, 253, 198],
-#     [4, 250, 122],
-#     [77, 253, 1],
-#     [177, 253, 3],
-#     [247, 254, 1],
-#     [255, 176, 0],
-#     [250, 68, 3]
-# ])
+KNN = KNeighborsRegressor(3)
 
 SENSOR_X = np.array([
-    24, 26, 22, 27, 25, 23, 21, 27, 25, 23, 21, 26, 24, 22, 26, 23, 25,
-    23, 25, 22, 25, 23, 21, 24, 22,  8, 10,  6, 11,  9,  7,  5, 11,  9,
-    7,  5, 10,  8,  6,  9,  6,  9,  7, 10,  7, 11,  9,  7, 10,  8
+    727, 778, 670, 805, 754, 698, 642, 816, 747, 693, 642,
+    786, 722, 674, 777, 701, 756, 700, 747, 663, 747, 699,
+    639, 727, 656, 235, 290, 183, 317, 260, 208, 156, 319,
+    268, 213, 143, 287, 239, 176, 259, 185, 262, 204, 299,
+    211, 320, 266, 214, 306, 234
 ])
 
 SENSOR_Y = np.array([
-    3,  4,  4,  6,  6,  6,  6,  8,  8,  8,  8, 10, 10, 10, 12, 12, 15,
-    15, 17, 17, 19, 19, 19, 21, 21,  3,  4,  4,  6,  6,  6,  6,  8,  8,
-    8,  8, 10, 10, 10, 12, 12, 15, 15, 17, 17, 19, 19, 19, 21, 21
+    94, 124, 123, 185, 175, 174, 184, 245, 243, 244, 249,
+    308, 305, 313, 368, 368, 442, 441, 507, 508, 569, 555,
+    571, 620, 622, 91, 120, 119, 180, 170, 168, 180, 245,
+    240, 240, 242, 307, 299, 304, 363, 366, 437, 436, 502,
+    503, 568, 551, 563, 618, 616
 ])
+
+TRAIN_X = np.stack([SENSOR_X, SENSOR_Y], axis=1)
+
+X1 = np.repeat(np.arange(WIDTH), HEIGHT)
+X2 = np.tile(np.arange(HEIGHT), WIDTH)
+
+TEST_X = np.stack([X1, X2], axis=1)
+
+TEMPLATE = cv2.imread("utils/template.png", cv2.IMREAD_GRAYSCALE)
+MASK = TEMPLATE == 255
+
+BLUR_SIZE = 101
 
 
 class Thermogram(object):
@@ -102,31 +106,12 @@ class Thermogram(object):
 
         temperature[temperature < MIN_TEMP] = MIN_TEMP
         temperature[temperature > MAX_TEMP] = MAX_TEMP
-
-        # temperature = ((temperature - MIN_TEMP) / TEMP_RANGE) * 10.0
-        # temperature = temperature.astype(np.int8)
-
         temperature = ((temperature - MIN_TEMP) / TEMP_RANGE)
 
+        KNN.fit(TRAIN_X, temperature)
         thermogram = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
-        mask = np.zeros((HEIGHT, WIDTH), dtype=np.int8)
-        template = pd.read_csv("utils/template.csv",
-                               header=None).to_numpy(dtype=np.int8)
-        # mask[2:-1, 5:14] = template
-
-        # thermogram[SENSOR_Y, SENSOR_X, :] = CMAP[temperature]
-
-        for i in range(temperature.size):
-            thermogram[SENSOR_Y[i], SENSOR_X[i], :] = \
-                np.array(cm.jet(temperature[i]))[:-1] * 255
-
-            # thermogram[template==-(i + 1), :] = \
-            #     np.array(cm.jet(temperature[i]))[:-1] * 255
-
-        thermogram = Thermogram.gaussian_blur(thermogram)
-        thermogram = Thermogram.interpolate(thermogram)
-        thermogram = Thermogram.average_blur(thermogram)
-        # thermogram = Thermogram.gaussian_blur(thermogram)
-        thermogram = Thermogram.apply_brightness_contrast(thermogram)
+        thermogram[X2, X1, :] = cm.jet(KNN.predict(TEST_X))[:, :-1] * 255
+        thermogram = cv2.GaussianBlur(thermogram, (BLUR_SIZE, BLUR_SIZE), 0)
+        thermogram[MASK, :] = 0
 
         return thermogram
