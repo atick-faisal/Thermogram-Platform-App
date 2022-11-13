@@ -31,10 +31,9 @@ class UiState(Thread):
             if self.data != None:
                 self.thermogram = Thermogram.generate_thermogram(self.data)
                 self.on_temperature_change(self.thermogram)
-            time.sleep(0.01)
 
     def record_data(self, id, name, age, weigth, gender):
-        path = os.path.join("data", id)
+        path = os.path.join(os.getcwd(), "data", id)
         if not os.path.exists(path):
             os.makedirs(path)
 

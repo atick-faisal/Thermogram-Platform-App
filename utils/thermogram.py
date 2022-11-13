@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 from typing import List
@@ -38,7 +39,8 @@ X2 = np.tile(np.arange(HEIGHT), WIDTH)
 
 TEST_X = np.stack([X1, X2], axis=1)
 
-TEMPLATE = cv2.imread("utils/template.png", cv2.IMREAD_GRAYSCALE)
+TEMPLATE_PATH = os.path.join(os.getcwd(), "utils", "template.png")
+TEMPLATE = cv2.imread(TEMPLATE_PATH, cv2.IMREAD_GRAYSCALE)
 MASK = TEMPLATE == 255
 
 BLUR_SIZE = 101
