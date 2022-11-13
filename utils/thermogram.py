@@ -39,7 +39,7 @@ X2 = np.tile(np.arange(HEIGHT), WIDTH)
 
 TEST_X = np.stack([X1, X2], axis=1)
 
-TEMPLATE_PATH = os.path.join(os.getcwd(), "utils", "template.png")
+TEMPLATE_PATH = os.path.join(os.getcwd(), "assets", "template.png")
 TEMPLATE = cv2.imread(TEMPLATE_PATH, cv2.IMREAD_GRAYSCALE)
 MASK = TEMPLATE == 255
 
