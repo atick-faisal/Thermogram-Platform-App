@@ -16,8 +16,27 @@ Thermogram Platform App
   <img src="assets/ss.png"/>
 </p>
 
-### How To Install
-1. Download the .zip archive and extract
+
+### Download
+<p align="center">
+  <a href="https://github.com/atick-faisal/Thermogram-Platform-App/releases/download/v1.0.1/thermogram_platform_v1.0.1.zip">
+    <img src="assets/download.png" width="300"/>
+  </a>
+</p>
+<p align="center">Download for Windows 10/11</p>
+
+
+### Installation
+1. Download and extract the archive
+2. Move into the `driver` directory inside the extracted folder
+3. Right click on the `silabser.inf` file and click `install`
+4. (Optional) Restart the computer
+5. Connect the Thermogram Platform via USB cable
+6. Run the `main.exe` file inside the extracted folder
+
+
+### Development
+1. Clone the repository
 2. Install dependencies
 
 ```
@@ -28,13 +47,6 @@ Thermogram Platform App
   pip install pyserial
   pip install opencv-python
 ```
-
-
-### How To Use
-1. Connect the Thermal Platform to the PC using a USB cable
-2. Move into the software folder and run `main.py`
-3. Step onto the plaform as guided by the foot outline
-4. Click `Save Thermogram` button to save the thermogram
 
 <p align="center"><img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" /></p>
 <p align="center"><a href="https://sites.google.com/view/mchowdhury" target="_blank">Qatar University Machine Learning Group</a>
